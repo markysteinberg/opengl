@@ -34,10 +34,12 @@ int run() {
     glEnable(GL_DEPTH_TEST);
     LOG(INFO, "Depth test enabled"); 
 
+
     /* +== MODELS ==+ */ 
     std::unordered_map<std::string, Model> models; 
-    models["dog"]    = load_model("assets/objects+textures/dog/13463_Australian_Cattle_Dog_v3.obj");
+    models.emplace("dog", load_model("assets/objects+textures/dog/13463_Australian_Cattle_Dog_v3.obj"));
     //models["ground"] = load_model("assets/objects+textures/ground/ground.obj");
+
 
     for (auto &[name, m] : models) {
         if (!m.valid) {
@@ -49,7 +51,6 @@ int run() {
     /* +== ====== ==+ */
 
     Shader default_shader("assets/shaders/default.vert", "assets/shaders/default.frag");
-    // Shader skybox_shader("assets/shaders/skybox.vert", "assets/shaders/skybox.frag");
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -100,15 +101,14 @@ int run() {
         proj_mat = glm::perspective(glm::radians(FOV), (float)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 800.0f);
         /* +== ========================== ==+ */
 
-        /* +== Ground ==+ */
-/*      glm::mat4 ground_mat = glm::mat4(1.0f);
+        /*
+        glm::mat4 ground_mat = glm::mat4(1.0f);
         glm::mat4 mvp_ground = proj_mat * view_mat * ground_mat;
         glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp_ground));
         glUniform1f(timeLoc, time);
-        models["ground"].draw(hasTexLoc, diffuseLoc);        
-*/        
-
-        /* +== Dog Model ==+ */ 
+        models["ground"].draw(hasTexLoc, diffuseLoc);          
+        */
+ 
         glm::mat4 dog_mat = glm::mat4(1.0f);
         dog_mat = glm::translate(dog_mat , glm::vec3(0.0f, 0.0f, 0.0f));
         dog_mat = glm::rotate(dog_mat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -131,9 +131,7 @@ int run() {
 }
 
 int main(int argc, char* argv[]) { 
-    int result = run();
-    glfwTerminate();
-    return result;
+    return run();
 }
 
 
