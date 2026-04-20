@@ -1,6 +1,3 @@
-# PERSONAL ACCESS TOKEN 
-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
-
 # TODO LIST 
  - Maybe implement hot re-loading when you feel like it 
  - Implement a physics system and collider (rigid body, box collider)
