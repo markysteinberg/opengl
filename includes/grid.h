@@ -1,7 +1,7 @@
 #ifndef GRID_H
 #define GRID_H 
 
-#include <glad/glad.h>
+#include "glad/glad.h"
 
 #include <glm/glm.hpp>
 

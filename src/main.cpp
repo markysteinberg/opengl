@@ -35,7 +35,7 @@ int run() {
     glEnable(GL_DEPTH_TEST);
     LOG(INFO, "Depth test enabled"); 
 
-    std::vector<Entity> scene; 
+    std::vector<Entity> scene;
 
     /* +== SETUP MODELS ==+ */ 
     std::unordered_map<std::string, Model> models; 

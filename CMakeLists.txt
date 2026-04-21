@@ -26,10 +26,12 @@ target_compile_features(enginetest PRIVATE cxx_std_20)
 
 target_include_directories(enginetest PRIVATE includes)
 
-if (UNIX)
+if(UNIX)
     target_link_libraries(enginetest PRIVATE glad glfw GL assimp dl) 
-else()
-    message(FATAL_ERROR "No compatibility")
+elseif(WIN32)
+	target_link_libraries(enginetest PRIVATE glad glfw opengl32 assimp) 
+else() 
+    message(FATAL_ERROR "No compatibility with system")
 endif()
 
 
