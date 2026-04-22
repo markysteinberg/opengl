@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <string> 
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
@@ -21,7 +22,7 @@
 #include "grid.h" 
 #include "entity.h"
 
-int run() {
+int run(int argc, char* argv[]) {
     LOG(INFO, "=== Startup: ", WINDOW_TITLE, " ", WINDOW_WIDTH, "x", WINDOW_HEIGHT, " FOV=", FOV, " ===");
 
     Window window(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
@@ -78,6 +79,11 @@ int run() {
 
     Camera camera;
     camera.attach(window.get());
+    for (int i = 0; i < argc; i++) {
+        if (argv[i] == "--vm") {
+            camera.setUseRaw(false); 
+        }
+    }
 
     Skybox skybox; 
     
@@ -138,9 +144,11 @@ int run() {
 }
 
 int main(int argc, char* argv[]) { 
-    int result = run();
+    int result = run(argc, argv);
+    
     glfwTerminate();
     LOG(INFO, "GLFW Terminated");
+    
     return result;
 }
 

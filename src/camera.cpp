@@ -40,7 +40,6 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
         position += right * vel;
         isMoving = true;
     }
-
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) 
         position.y += vel;
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) 
@@ -48,34 +47,62 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
 }   
 
 void Camera::attach(GLFWwindow* window) {
+    this->window = window;
+    
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, mouseCallback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // Trying to fix VMWare issue
+    if (glfwRawMouseMotionSupported()) 
+        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
     LOG(INFO, "Camera attached to window, cursor captured");
 }
-
+ 
 void Camera::handleMouse(double xpos, double ypos) {
-    if (!mouseCaptured) return; // Guard for mouseCaptured 
-    
-    if (firstMouse) { 
-        lastX = xpos; 
+    if (!mouseCaptured) return;
+
+    if (useRaw) { 
+        if (firstMouse) { 
+            lastX = xpos; 
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos;
+
+        lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
-    }
 
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos;
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
 
-    lastX = xpos;
-    lastY = ypos;
+        yaw += xoffset; 
+        pitch += yoffset;
+    } else { // Virtual Machine detected 
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
 
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
+        if (firstMouse) {
+            glfwSetCursorPos(window, width / 2.0, height / 2.0);
+            firstMouse = false;
+            return;
+        }
 
-    yaw += xoffset; 
-    pitch += yoffset;
+        float xoffset = xpos - width / 2.0f;
+        float yoffset = height / 2.0f - ypos;
 
+        glfwSetCursorPos(window, width / 2.0, height / 2.0);
+
+        xoffset *= sensitivity;
+        yoffset *= sensitivity;
+
+        yaw += xoffset;
+        pitch += yoffset; 
+    }   
+    
     if (pitch > 89.0f) pitch = 89.0f;
     if (pitch < -89.0f) pitch = -89.0f;
 

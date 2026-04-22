@@ -17,7 +17,12 @@ public:
 
     void attach(GLFWwindow* window);
 
+    void setUseRaw(bool v) { useRaw = v; }
+    
 private: 
+    GLFWwindow* window = nullptr; 
+
+    bool useRaw = true;
     bool isMoving = false;
 
     glm::vec3 position = {20.0f, 50.0f, 50.0f};

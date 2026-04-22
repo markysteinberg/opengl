@@ -93,3 +93,7 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
 void Shader::setInt(const std::string& name, int value) const {
     glUniform1i(glGetUniformLocation(id, name.c_str()), value);
 }
+
+void Shader::setFloat(const std::string& name, int value) const {
+    glUniform1f(glGetUniformLocation(id, name.c_str()), value);
+}
