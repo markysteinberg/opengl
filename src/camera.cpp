@@ -1,4 +1,6 @@
 
+#include <algorithm>
+
 #include <GLFW/glfw3.h>
 
 #include "camera.h"
@@ -51,7 +53,7 @@ void Camera::attach(GLFWwindow* window) {
     
     glfwSetWindowUserPointer(window, this);
     glfwSetCursorPosCallback(window, mouseCallback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (useRaw) glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Trying to fix VMWare issue
     if (glfwRawMouseMotionSupported()) 
@@ -63,6 +65,11 @@ void Camera::attach(GLFWwindow* window) {
 void Camera::handleMouse(double xpos, double ypos) {
     if (!mouseCaptured) return;
 
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
+    float xoffset, yoffset;
+
     if (useRaw) { 
         if (firstMouse) { 
             lastX = xpos; 
@@ -70,8 +77,8 @@ void Camera::handleMouse(double xpos, double ypos) {
             firstMouse = false;
         }
 
-        float xoffset = xpos - lastX;
-        float yoffset = lastY - ypos;
+        xoffset = xpos - lastX;
+        yoffset = lastY - ypos;
 
         lastX = xpos;
         lastY = ypos;
@@ -81,9 +88,8 @@ void Camera::handleMouse(double xpos, double ypos) {
 
         yaw += xoffset; 
         pitch += yoffset;
-    } else { // Virtual Machine detected 
-        int width, height;
-        glfwGetWindowSize(window, &width, &height);
+    } else { // Virtual Machine detected         
+        static float smoothX = 0.0f, smoothY = 0.0f;
 
         if (firstMouse) {
             glfwSetCursorPos(window, width / 2.0, height / 2.0);
@@ -91,16 +97,20 @@ void Camera::handleMouse(double xpos, double ypos) {
             return;
         }
 
-        float xoffset = xpos - width / 2.0f;
-        float yoffset = height / 2.0f - ypos;
+        xoffset = xpos - width / 2.0f;
+        yoffset = height / 2.0f - ypos;
 
         glfwSetCursorPos(window, width / 2.0, height / 2.0);
 
-        xoffset *= sensitivity;
-        yoffset *= sensitivity;
+        xoffset *= std::clamp(xoffset, -50.0f, 50.0f);
+        yoffset *= std::clamp(yoffset, -50.0f, 50.0f);
 
-        yaw += xoffset;
-        pitch += yoffset; 
+        float alpha = 0.15f;
+        smoothX = smoothX * (1.0f - alpha) + xoffset * alpha;
+        smoothY = smoothY * (1.0f - alpha) + yoffset * alpha;
+
+        yaw += smoothX * sensitivity;
+        pitch += smoothY * sensitivity; 
     }   
     
     if (pitch > 89.0f) pitch = 89.0f;
