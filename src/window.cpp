@@ -57,7 +57,7 @@ Window::~Window() {
 
 GLFWwindow* Window::get() const { return window; }
 
-void Window::processInputs(GLFWwindow* window, Grid* grid) {
+void Window::processInput(GLFWwindow* window, Grid* grid) {
     Camera* cam = static_cast<Camera*>(glfwGetWindowUserPointer(window));
     
     if (is_key_pressed_once(window, GLFW_KEY_Q)) {

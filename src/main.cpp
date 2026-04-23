@@ -22,6 +22,14 @@
 #include "grid.h" 
 #include "entity.h"
 
+void initGL() {
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
 int run(int argc, char* argv[]) {
     LOG(INFO, "=== Startup: ", WINDOW_TITLE, " ", WINDOW_WIDTH, "x", WINDOW_HEIGHT, " FOV=", FOV, " ===");
 
@@ -33,12 +41,10 @@ int run(int argc, char* argv[]) {
     }
     LOG(INFO, "GLAD initialized");
 
-    glEnable(GL_DEPTH_TEST);
-    LOG(INFO, "Depth test enabled"); 
+    initGL();
 
     std::vector<Entity> scene;
 
-    /* +== SETUP MODELS ==+ */ 
     std::unordered_map<std::string, Model> models; 
     models.emplace("dog", load_model("assets/objects+textures/dog/13463_Australian_Cattle_Dog_v3.obj"));
     //models["ground"] = load_model("assets/objects+textures/ground/ground.obj");
@@ -50,23 +56,9 @@ int run(int argc, char* argv[]) {
         }
         m.setup();
     }
-    /*
-    Entity dog(&models["dog"], 
-        glm::vec3(0.0f, 0.0f, 0.0f), 
-        glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f),
-        glm::vec3(1.0f)
-    );
-    */
+
     Shader default_shader("assets/shaders/default.vert", "assets/shaders/default.frag");
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    GLuint mvpLoc = glGetUniformLocation(default_shader.getID(), "MVP");
-    GLuint timeLoc = glGetUniformLocation(default_shader.getID(), "time");
-    GLuint hasTexLoc = glGetUniformLocation(default_shader.getID(), "hasTexture");
-    GLuint diffuseLoc = glGetUniformLocation(default_shader.getID(), "diffuse");
-    GLuint texLoc = glGetUniformLocation(default_shader.getID(), "diffuseTex");
-    
+    default_shader.cacheUniforms();
 
     /* +== delta time =+ */
     float deltaTime = 0.0f;
@@ -74,7 +66,7 @@ int run(int argc, char* argv[]) {
     /* +== ========== =+ */
         
     default_shader.use();
-    glUniform1i(texLoc, 0);
+    glUniform1i(default_shader.texLoc, 0);
     LOG(INFO, "Default shader bound, diffuseTex sampler set to unit 0");
 
     Camera camera;
@@ -92,38 +84,23 @@ int run(int argc, char* argv[]) {
         
         double time = glfwGetTime();
         
-        window.processInputs(window.get(), &grid);
+        window.processInput(window.get(), &grid);
         camera.processInput(window.get(), deltaTime);
-
-        // glm::vec3 background_color = {sin(time) * 0.5f + 0.5f, sin(time + 1) * 0.5f + 0.5f, sin(time + 2) * 0.5 + 0.5f};
-        // background_color = glm::normalize(background_color);
-        glClearColor(0.53f, 0.82f, 0.92f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         default_shader.use();
         
-        /* +== View and Projection Matrix ==+ */
         glm::mat4 view_mat = glm::mat4(1.0f);
         view_mat = camera.getViewMatrix();
         glm::mat4 proj_mat;
         proj_mat = glm::perspective(glm::radians(FOV), (float)WINDOW_WIDTH / WINDOW_HEIGHT, 0.1f, 800.0f);
-        /* +== ========================== ==+ */
-
-        /*
-        glm::mat4 ground_mat = glm::mat4(1.0f);
-        glm::mat4 mvp_ground = proj_mat * view_mat * ground_mat;
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp_ground));
-        glUniform1f(timeLoc, time);
-        models["ground"].draw(hasTexLoc, diffuseLoc);          
-        */
- 
+        
         glm::mat4 dog_mat = glm::mat4(1.0f);
         dog_mat = glm::translate(dog_mat , glm::vec3(0.0f, 0.0f, 0.0f));
         dog_mat = glm::rotate(dog_mat, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         glm::mat4 mvp_dog = proj_mat * view_mat * dog_mat;
-        glUniformMatrix4fv(mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp_dog));
-        glUniform1f(timeLoc, time);
-        models["dog"].draw(hasTexLoc, diffuseLoc);
+        glUniformMatrix4fv(default_shader.mvpLoc, 1, GL_FALSE, glm::value_ptr(mvp_dog));
+        glUniform1f(default_shader.timeLoc, time);
+        models["dog"].draw(default_shader.hasTexLoc, default_shader.diffuseLoc);
 
         skybox.draw(view_mat, proj_mat);
 

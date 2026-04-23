@@ -17,7 +17,7 @@ public:
 
     GLFWwindow* get() const;
 
-    void processInputs(GLFWwindow* window, Grid* grid);
+    void processInput(GLFWwindow* window, Grid* grid);
 
 private: 
     GLFWwindow* window = nullptr;

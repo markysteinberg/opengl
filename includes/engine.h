@@ -3,14 +3,20 @@
 
 #include <GLFW/glfw3.h>
 
+#include "renderer.h"
+
 class Engine {
 public: 
-    int init(Window* window); 
-    void update();
-    void render();
+    Engine();
+    ~Engine();
+
+    int init();
+    void run();
+    void shutdown();
 
 private: 
-    GLFWwindow* window;
+    Window window;
+    Renderer renderer;
 };
 
 

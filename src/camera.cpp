@@ -67,7 +67,6 @@ void Camera::handleMouse(double xpos, double ypos) {
 
     float xoffset, yoffset;
 
-
     if (firstMouse) { 
         lastX = xpos; 
         lastY = ypos;
